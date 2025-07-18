@@ -43,7 +43,7 @@ app.get("/", (req, res) => {
 
 app.use(errorHandler);
 
-app.use("/*fuck", (req, res) => {
+app.use("/*etc", (req, res) => {
   res.status(404).json({
     error: "Endpoint not found",
     path: req.originalUrl,

@@ -175,5 +175,4 @@ class NasaApiService {
   }
 }
 
-// Export singleton instance
 export const nasaApiService = new NasaApiService();
