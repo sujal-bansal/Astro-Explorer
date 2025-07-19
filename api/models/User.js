@@ -200,7 +200,6 @@ userSchema.methods.incLoginAttempts = async function () {
   }
   const updates = { $inc: { loginAttempts: 1 } };
 
-  // If we're at max attempts and not locked, lock account
   if (this.loginAttempts + 1 >= maxAttempts && !this.isLocked) {
     updates.$set = { lockUntil: Date.now() + lockTime };
   }
@@ -208,19 +207,16 @@ userSchema.methods.incLoginAttempts = async function () {
   return this.updateOne(updates);
 };
 
-// Method to reset login attempts
 userSchema.methods.resetLoginAttempts = async function () {
   return this.updateOne({
     $unset: { loginAttempts: 1, lockUntil: 1 },
   });
 };
 
-// Method to update API usage
 userSchema.methods.incrementApiUsage = async function () {
   const now = new Date();
   const resetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-  // Reset monthly count if it's a new month
   if (now >= this.apiUsage.resetDate) {
     this.apiUsage.monthlyRequests = 0;
     this.apiUsage.resetDate = resetDate;
@@ -233,7 +229,6 @@ userSchema.methods.incrementApiUsage = async function () {
   await this.save();
 };
 
-// Static method to find user by credentials
 userSchema.statics.findByCredentials = async function (email, password) {
   const user = await this.findOne({ email }).select("+password");
 
@@ -254,19 +249,16 @@ userSchema.statics.findByCredentials = async function (email, password) {
     throw new Error("Invalid login credentials");
   }
 
-  // Reset login attempts on successful login
   if (user.loginAttempts > 0) {
     await user.resetLoginAttempts();
   }
 
-  // Update last login
   user.lastLogin = new Date();
   await user.save();
 
   return user;
 };
 
-// Static method to clean expired tokens
 userSchema.statics.cleanExpiredTokens = async function () {
   const expiredDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
 
@@ -280,7 +272,6 @@ userSchema.statics.cleanExpiredTokens = async function () {
   );
 };
 
-// Transform output to remove sensitive data
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
 

@@ -157,16 +157,13 @@ class DatabaseConnection {
     }
   }
 
-  // Cleanup method for graceful shutdown
   async cleanup() {
     try {
       console.log("🧹 Cleaning up database connections...");
 
-      // Clean up expired tokens
       const User = mongoose.model("User");
       await User.cleanExpiredTokens();
 
-      // Disconnect from database
       await this.disconnect();
 
       console.log("✅ Database cleanup completed");
@@ -176,10 +173,8 @@ class DatabaseConnection {
   }
 }
 
-// Create singleton instance
 const database = new DatabaseConnection();
 
-// Graceful shutdown handlers
 process.on("SIGINT", async () => {
   console.log("\n🛑 Received SIGINT. Graceful shutdown...");
   await database.cleanup();
@@ -192,14 +187,12 @@ process.on("SIGTERM", async () => {
   process.exit(0);
 });
 
-// Handle uncaught exceptions
 process.on("uncaughtException", async (error) => {
   console.error("❌ Uncaught Exception:", error);
   await database.cleanup();
   process.exit(1);
 });
 
-// Handle unhandled promise rejections
 process.on("unhandledRejection", async (reason, promise) => {
   console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
   await database.cleanup();
